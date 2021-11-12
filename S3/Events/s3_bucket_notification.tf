@@ -81,10 +81,85 @@ resource "aws_lambda_function" "filename_logger_lambda" {
   runtime       = "python3.9"
 }
 
+## SNS Topic ##
+###############
+
+resource "aws_sns_topic" "event_topic" {
+  name = "s3-event-topic"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = ["SNS:Publish"]
+        Principal = {
+          Service = "s3.amazonaws.com"
+        }
+        Resource = "arn:aws:sns:*:*:s3-event-topic"
+        Condition = {
+          ArnLike = { "aws:SourceArn" = "${aws_s3_bucket.sample_event_bucket.arn}" }
+        }
+        Effect = "Allow"
+      }
+    ]
+  })
+}
+
+resource "aws_sns_topic_subscription" "sqs_subscription_target" {
+  topic_arn = aws_sns_topic.event_topic.arn
+  protocol  = "sqs"
+  endpoint  = aws_sqs_queue.sqs_queue.arn
+}
+
+## SQS Queue ##
+###############
+
+resource "aws_sqs_queue" "sqs_queue" {
+  name                      = "topic-subscription-queue"
+  message_retention_seconds = 60
+}
+
+resource "aws_sqs_queue_policy" "allow_sns_send_message" {
+  queue_url = aws_sqs_queue.sqs_queue.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Id      = "sqs policy"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "sns.amazonaws.com"
+      }
+      Action   = "sqs:SendMessage"
+      Resource = "${aws_sqs_queue.sqs_queue.arn}"
+      Condition = {
+        ArnEquals = {
+          "aws:SourceArn" : "${aws_sns_topic.event_topic.arn}"
+        }
+      }
+      },
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "s3.amazonaws.com"
+        }
+        Action   = "sqs:SendMessage"
+        Resource = "${aws_sqs_queue.sqs_queue.arn}"
+        Condition = {
+          ArnEquals = {
+            "aws:SourceArn" : "${aws_s3_bucket.sample_event_bucket.arn}"
+          }
+        }
+    }]
+  })
+}
+
 ## Bucket Event ##
 ##################
 
-resource "aws_s3_bucket_notification" "bucket_notification" {
+# Note that multiple notifications for the same bucket
+# have to be contained within the same 'aws_s3_bucket_notification'
+# block, or they will override one another.
+resource "aws_s3_bucket_notification" "bucket_notifications" {
   bucket = aws_s3_bucket.sample_event_bucket.id
 
   lambda_function {
@@ -92,6 +167,20 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "lambda/"
     filter_suffix       = ".txt"
+  }
+
+  topic {
+    topic_arn     = aws_sns_topic.event_topic.arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix = "sns/"
+    filter_suffix = ".txt"
+  }
+
+  queue {
+    queue_arn     = aws_sqs_queue.topic_subscription_queue.arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix = "sqs/"
+    filter_suffix = ".txt"
   }
 
   depends_on = [aws_lambda_permission.allow_bucket]
