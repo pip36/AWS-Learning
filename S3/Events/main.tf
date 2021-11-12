@@ -12,5 +12,10 @@ terraform {
 provider "aws" {
   profile = "personal"
   region  = "eu-west-1"
+  default_tags {
+    tags = {
+      Source = "AWS-Learning"
+    }
+  }
 }
 

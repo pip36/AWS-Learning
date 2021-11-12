@@ -4,10 +4,6 @@
 resource "aws_s3_bucket" "sample_event_bucket" {
   bucket        = "test-bucket-for-s3-events"
   force_destroy = true
-
-  tags = {
-    Source = "AWS-Learning"
-  }
 }
 
 ## IAM Roles / Policies ##
