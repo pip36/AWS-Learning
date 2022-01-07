@@ -2,3 +2,6 @@
 terraform.tfstate*
 .terraform.lock*
 *.zip
+.ionide
+**/bin
+**/obj
