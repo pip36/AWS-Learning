@@ -5,3 +5,4 @@ terraform.tfstate*
 .ionide
 **/bin
 **/obj
+node_modules/

@@ -1,0 +1,12 @@
+{
+  "name": "apigateway",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "frontend:start": "yarn --cwd frontend/todo-app/ run vite",
+    "frontend:test": "yarn --cwd frontend/todo-app/ run test --watch-all"
+  },
+  "author": "",
+  "license": "ISC"
+}
