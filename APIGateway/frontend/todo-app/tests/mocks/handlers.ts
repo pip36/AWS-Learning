@@ -1,4 +1,5 @@
 import { DefaultRequestBody, rest } from "msw";
+import config from "../../src/config";
 import {
   CreateTodoBody,
   generateTodo,
@@ -7,17 +8,17 @@ import {
 import db from "./db";
 
 export const handlers = [
-  rest.get("https://api-url/todos", (req, res, ctx) => {
+  rest.get(config.TODO_API_URL, (req, res, ctx) => {
     return res(ctx.status(200), ctx.json(db.getTodos()));
   }),
 
-  rest.post<CreateTodoBody>("https://api-url/todos", (req, res, ctx) => {
+  rest.post<CreateTodoBody>(config.TODO_API_URL, (req, res, ctx) => {
     db.addTodo(generateTodo({ description: req.body.description }));
     return res(ctx.status(201), ctx.json(db.getTodos()));
   }),
 
   rest.put<UpdateTodoBody, { todoId: string }>(
-    "https://api-url/todos/{:todoId}",
+    `${config.TODO_API_URL}/{:todoId}`,
     (req, res, ctx) => {
       db.updateTodo(req.params.todoId, req.body);
       return res(ctx.status(200), ctx.json(db.getTodos()));
@@ -25,7 +26,7 @@ export const handlers = [
   ),
 
   rest.delete<DefaultRequestBody, { todoId: string }>(
-    "https://api-url/todos/{:todoId}",
+    `${config.TODO_API_URL}/{:todoId}`,
     (req, res, ctx) => {
       db.deleteTodo(req.params.todoId);
       return res(ctx.status(200), ctx.json(db.getTodos()));

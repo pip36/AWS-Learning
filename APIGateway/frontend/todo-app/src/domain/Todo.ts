@@ -1,3 +1,4 @@
+import config from "../config";
 import { randomString, randomUUID } from "../util";
 import { useQuery } from "../util/useQuery";
 
@@ -25,10 +26,10 @@ export const FAILED_TODOS_MESSAGE = "Oops. Something went wrong...";
 export const NEW_TODO_LABEL = "Add a todo";
 
 export const useTodos = () => {
-  const query = useQuery<Todo[]>("https://api-url/todos");
+  const query = useQuery<Todo[]>(config.TODO_API_URL);
 
   const newTodo = (body: CreateTodoBody) =>
-    fetch("https://api-url/todos", {
+    fetch(config.TODO_API_URL, {
       method: "POST",
       body: JSON.stringify(body),
       headers: {
@@ -39,7 +40,7 @@ export const useTodos = () => {
     });
 
   const updateTodo = (todoId: string, body: UpdateTodoBody) =>
-    fetch(`https://api-url/todos/${todoId}`, {
+    fetch(`${config.TODO_API_URL}/${todoId}`, {
       method: "PUT",
       body: JSON.stringify(body),
       headers: {
@@ -50,7 +51,7 @@ export const useTodos = () => {
     });
 
   const deleteTodo = (todoId: string) =>
-    fetch(`https://api-url/todos/${todoId}`, {
+    fetch(`${config.TODO_API_URL}/${todoId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

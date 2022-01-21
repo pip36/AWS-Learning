@@ -12,6 +12,7 @@ import {
 import db from "./mocks/db";
 import userEvent from "@testing-library/user-event";
 import { render, stubApi500Error, stubApiNetworkError } from "./utils/render";
+import config from "../src/config";
 
 beforeEach(() => {
   db.seedTodos();
@@ -36,7 +37,7 @@ describe("Todo List Feature", () => {
   });
 
   test("When todos returns 500, error message is displayed", async () => {
-    stubApi500Error("https://api-url/todos");
+    stubApi500Error(config.TODO_API_URL);
 
     render(<App />);
 
@@ -44,7 +45,7 @@ describe("Todo List Feature", () => {
   });
 
   test("When todos fails to connect, error message is displayed", async () => {
-    stubApiNetworkError("https://api-url/todos");
+    stubApiNetworkError(config.TODO_API_URL);
 
     render(<App />);
 
