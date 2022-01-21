@@ -1,13 +1,6 @@
-import x from "./auth";
 import { Auth } from "aws-amplify";
 import { useEffect, useState } from "react";
 import "./App.css";
-import {
-  FAILED_TODOS_MESSAGE,
-  NEW_TODO_LABEL,
-  NO_TODOS_MESSAGE,
-  useTodos,
-} from "./domain/Todo";
 import Todos from "./Todos";
 
 function App() {
