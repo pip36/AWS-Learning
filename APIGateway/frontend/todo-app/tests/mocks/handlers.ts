@@ -1,4 +1,4 @@
-import { rest } from "msw";
+import { DefaultRequestBody, rest } from "msw";
 import { CreateTodoBody, generateTodo } from "../../src/domain/Todo";
 import db from "./db";
 
@@ -9,6 +9,14 @@ export const handlers = [
 
   rest.post<CreateTodoBody>("https://api-url/todos", (req, res, ctx) => {
     db.addTodo(generateTodo({ description: req.body.description }));
-    return res(ctx.status(200), ctx.json(db.getTodos()));
+    return res(ctx.status(201), ctx.json(db.getTodos()));
   }),
+
+  rest.delete<DefaultRequestBody, { todoId: string }>(
+    "https://api-url/todos/{:todoId}",
+    (req, res, ctx) => {
+      db.deleteTodo(req.params.todoId);
+      return res(ctx.status(200), ctx.json(db.getTodos()));
+    }
+  ),
 ];

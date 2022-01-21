@@ -33,7 +33,19 @@ function App() {
         {query.isError && FAILED_TODOS_MESSAGE}
         {todos?.length === 0 && !query.isLoading && NO_TODOS_MESSAGE}
         {todos?.map((x) => (
-          <p key={x.id}>{x.description}</p>
+          <div key={x.id} style={{ display: "flex" }}>
+            <p>{x.description}</p>
+            <label
+              htmlFor={`remove-${x.id}`}
+              style={{ display: "none" }}
+            >{`remove-${x.description}`}</label>
+            <button
+              id={`remove-${x.id}`}
+              onClick={() => commands.deleteTodo(x.id)}
+            >
+              X
+            </button>
+          </div>
         ))}
       </header>
     </div>

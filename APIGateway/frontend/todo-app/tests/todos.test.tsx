@@ -1,4 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import { rest } from "msw";
 import App from "../src/App";
 import {
@@ -70,5 +74,26 @@ describe("Main Page", () => {
     unmount();
     render(<App />);
     expect(await screen.findByText("Another TODO")).toBeInTheDocument();
+  });
+
+  test("When I delete a todo it is removed, and is persisted.", async () => {
+    const { unmount } = render(<App />);
+
+    const firstTodo = db.getTodos()[0];
+    expect(await screen.findByText(firstTodo.description)).toBeInTheDocument();
+
+    userEvent.click(
+      await screen.findByLabelText(`remove-${firstTodo.description}`)
+    );
+
+    await waitForElementToBeRemoved(() =>
+      screen.queryByText(firstTodo.description)
+    );
+
+    // Simulate refreshing the page
+    unmount();
+    render(<App />);
+    await screen.findByText(db.getTodos()[0].description);
+    expect(screen.queryByText(firstTodo.description)).not.toBeInTheDocument();
   });
 });

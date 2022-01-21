@@ -31,6 +31,10 @@ class Db {
   addTodo(todo: Todo): void {
     this.data.todos[todo.id] = todo;
   }
+
+  deleteTodo(id: string): void {
+    delete this.data.todos[id];
+  }
 }
 
 const db = new Db();
