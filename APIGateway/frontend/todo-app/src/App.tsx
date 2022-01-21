@@ -1,4 +1,6 @@
-import { useState } from "react";
+import x from "./auth";
+import { Auth } from "aws-amplify";
+import { useEffect, useState } from "react";
 import "./App.css";
 import {
   FAILED_TODOS_MESSAGE,
@@ -6,58 +8,106 @@ import {
   NO_TODOS_MESSAGE,
   useTodos,
 } from "./domain/Todo";
+import Todos from "./Todos";
 
 function App() {
-  const { query, commands } = useTodos();
-  const todos = query.data;
-  const [newTodo, setNewTodo] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+
+  async function signUp(username: string, password: string) {
+    try {
+      const { user } = await Auth.signUp({
+        username,
+        password,
+      });
+      console.log(user);
+    } catch (error) {
+      console.log("error signing up:", error);
+    }
+  }
+
+  async function confirmSignUp(code: string) {
+    try {
+      await Auth.confirmSignUp(username, code);
+      setLoggedIn(true);
+    } catch (error) {
+      console.log("error confirming sign up", error);
+    }
+  }
+
+  async function signIn(username: string, password: string) {
+    console.log("SIGN in", username);
+    try {
+      const user = await Auth.signIn(username, password);
+      setLoggedIn(true);
+      console.log("USER", user);
+    } catch (error) {
+      console.log("error signing in", error);
+    }
+  }
+
+  async function signOut() {
+    try {
+      await Auth.signOut();
+      setLoggedIn(false);
+    } catch (error) {
+      console.log("error signing out: ", error);
+    }
+  }
+
+  async function getUser() {
+    Auth.currentAuthenticatedUser()
+      .then((user) => {
+        console.log("USER");
+        setLoggedIn(true);
+      })
+      .catch((err) => setLoggedIn(false));
+  }
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  if (loggedIn) {
+    return <Todos />;
+  }
 
   return (
-    <div className="App">
+    <div>
+      <button onClick={() => signIn(username, password)}>Sign in</button>
       <form
         onSubmit={(e) => {
+          console.log("submit");
           e.preventDefault();
-          setNewTodo("");
-          commands.newTodo({ description: newTodo });
+          signIn(username, password);
         }}
       >
-        <label htmlFor="new-todo">{NEW_TODO_LABEL}</label>
+        <label htmlFor="username">email</label>
         <input
-          id="new-todo"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
+          id="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <label htmlFor="password">password</label>
+        <input
+          id="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
       </form>
 
-      <header className="App-header">
-        {query.isError && FAILED_TODOS_MESSAGE}
-        {todos?.length === 0 && !query.isLoading && NO_TODOS_MESSAGE}
-        {todos?.map((x) => (
-          <div key={x.id} style={{ display: "flex" }}>
-            <label style={{ display: "flex", alignItems: "center" }}>
-              <input
-                type="checkbox"
-                checked={x.isDone}
-                onChange={() =>
-                  commands.updateTodo(x.id, { isDone: !x.isDone })
-                }
-              />
-              <p>{x.description}</p>
-            </label>
-
-            <label
-              htmlFor={`remove-${x.id}`}
-              style={{ display: "none" }}
-            >{`remove-${x.description}`}</label>
-            <button
-              id={`remove-${x.id}`}
-              onClick={() => commands.deleteTodo(x.id)}
-            >
-              X
-            </button>
-          </div>
-        ))}
-      </header>
+      <button onClick={() => signUp(username, password)}>Sign up</button>
+      <form onSubmit={() => signUp(username, password)}>
+        <label>email</label>
+        <input value={username} onChange={(e) => setUsername(e.target.value)} />
+        <label>password</label>
+        <input value={password} onChange={(e) => setPassword(e.target.value)} />
+      </form>
+      <br />
+      <input value={code} onChange={(e) => setCode(e.target.value)} />
+      <button onClick={() => confirmSignUp(code)}>Verify code</button>
     </div>
   );
 }

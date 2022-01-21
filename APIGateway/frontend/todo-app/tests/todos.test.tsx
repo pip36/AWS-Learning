@@ -13,6 +13,7 @@ import db from "./mocks/db";
 import userEvent from "@testing-library/user-event";
 import { render, stubApi500Error, stubApiNetworkError } from "./utils/render";
 import config from "../src/config";
+import Todos from "../src/Todos";
 
 beforeEach(() => {
   db.seedTodos();
@@ -21,13 +22,13 @@ beforeEach(() => {
 describe("Todo List Feature", () => {
   test("Message is displayed when no todos exist.", async () => {
     db.clear();
-    render(<App />);
+    render(<Todos />);
 
     expect(await screen.findByText(NO_TODOS_MESSAGE)).toBeInTheDocument();
   });
 
   test("Todos should be displayed.", async () => {
-    render(<App />);
+    render(<Todos />);
 
     db.getTodos().forEach(async ({ description }) => {
       expect(await screen.findByText(description)).toBeInTheDocument();
@@ -39,7 +40,7 @@ describe("Todo List Feature", () => {
   test("When todos returns 500, error message is displayed", async () => {
     stubApi500Error(config.TODO_API_URL);
 
-    render(<App />);
+    render(<Todos />);
 
     expect(await screen.findByText(FAILED_TODOS_MESSAGE)).toBeInTheDocument();
   });
@@ -47,13 +48,13 @@ describe("Todo List Feature", () => {
   test("When todos fails to connect, error message is displayed", async () => {
     stubApiNetworkError(config.TODO_API_URL);
 
-    render(<App />);
+    render(<Todos />);
 
     expect(await screen.findByText(FAILED_TODOS_MESSAGE)).toBeInTheDocument();
   });
 
   test("When I create a todo it becomes visible, and is persisted.", async () => {
-    const { refreshPage } = render(<App />);
+    const { refreshPage } = render(<Todos />);
 
     const input = await screen.findByLabelText(NEW_TODO_LABEL);
     userEvent.type(input, "Another TODO{enter}");
@@ -64,7 +65,7 @@ describe("Todo List Feature", () => {
   });
 
   test("When I delete a todo it is removed, and is persisted.", async () => {
-    const { refreshPage } = render(<App />);
+    const { refreshPage } = render(<Todos />);
 
     const todoToRemove = db.getTodos()[0];
 
@@ -84,7 +85,7 @@ describe("Todo List Feature", () => {
   });
 
   test("When I toggle a todo isDone or not, it is persisted", async () => {
-    const { refreshPage } = render(<App />);
+    const { refreshPage } = render(<Todos />);
 
     const todo = db.getTodos()[0];
 
