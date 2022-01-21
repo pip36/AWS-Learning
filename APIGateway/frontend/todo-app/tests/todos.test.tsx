@@ -1,9 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import { rest } from "msw";
 import App from "../src/App";
-import { FAILED_TODOS_MESSAGE, NO_TODOS_MESSAGE } from "../src/domain/Todo";
+import {
+  FAILED_TODOS_MESSAGE,
+  NEW_TODO_LABEL,
+  NO_TODOS_MESSAGE,
+} from "../src/domain/Todo";
 import db from "./mocks/db";
 import { server } from "./mocks/server";
+import userEvent from "@testing-library/user-event";
 
 beforeEach(() => {
   db.seedTodos();
@@ -50,5 +55,20 @@ describe("Main Page", () => {
     render(<App />);
 
     expect(await screen.findByText(FAILED_TODOS_MESSAGE)).toBeInTheDocument();
+  });
+
+  test("When I create a todo it becomes visible, and is persisted.", async () => {
+    const { unmount } = render(<App />);
+    const input = await screen.findByLabelText(NEW_TODO_LABEL);
+    userEvent.type(input, "Another TODO");
+    expect(await screen.findByDisplayValue("Another TODO")).toBeInTheDocument();
+
+    userEvent.type(input, "{enter}");
+    expect(screen.queryByDisplayValue("Another TODO")).not.toBeInTheDocument();
+
+    // Simulate refreshing the page
+    unmount();
+    render(<App />);
+    expect(await screen.findByText("Another TODO")).toBeInTheDocument();
   });
 });

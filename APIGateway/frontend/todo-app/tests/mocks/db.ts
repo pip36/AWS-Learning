@@ -27,6 +27,10 @@ class Db {
   getTodos(): Todo[] {
     return Object.entries(this.data.todos).map(([_, todo]) => todo);
   }
+
+  addTodo(todo: Todo): void {
+    this.data.todos[todo.id] = todo;
+  }
 }
 
 const db = new Db();
