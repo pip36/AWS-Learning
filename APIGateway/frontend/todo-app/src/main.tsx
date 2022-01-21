@@ -1,10 +1,11 @@
 import "./polyfills";
-import "./auth";
+import "./App.css";
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import db from "../tests/mocks/db";
+import AuthProvider from "./auth/AuthProvider";
 
 if (process.env.NODE_ENV === "development") {
   db.seed();
@@ -17,7 +18,9 @@ if (process.env.NODE_ENV === "development") {
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
