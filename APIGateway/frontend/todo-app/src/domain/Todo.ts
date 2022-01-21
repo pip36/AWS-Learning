@@ -4,15 +4,19 @@ import { useQuery } from "../util/useQuery";
 export type Todo = {
   id: string;
   description: string;
+  isDone: boolean;
 };
 
 export type CreateTodoBody = {
   description: string;
 };
 
+export type UpdateTodoBody = Partial<Omit<Todo, "id">>;
+
 export const generateTodo = (todo: Partial<Todo> = {}): Todo => ({
   id: randomUUID(),
   description: randomString(),
+  isDone: false,
   ...todo,
 });
 
@@ -26,6 +30,17 @@ export const useTodos = () => {
   const newTodo = (body: CreateTodoBody) =>
     fetch("https://api-url/todos", {
       method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then(async (res) => {
+      query.invalidate();
+    });
+
+  const updateTodo = (todoId: string, body: UpdateTodoBody) =>
+    fetch(`https://api-url/todos/${todoId}`, {
+      method: "PUT",
       body: JSON.stringify(body),
       headers: {
         "Content-Type": "application/json",
@@ -49,6 +64,7 @@ export const useTodos = () => {
     commands: {
       newTodo,
       deleteTodo,
+      updateTodo,
     },
   };
 };

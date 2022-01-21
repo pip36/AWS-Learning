@@ -8,8 +8,7 @@ export const render = (el: React.ReactElement) => {
   return {
     ...result,
     refreshPage: () => {
-      result.unmount();
-      testingLibraryRender(el);
+      result.rerender(el);
     },
   };
 };

@@ -1,4 +1,8 @@
-import { screen, waitForElementToBeRemoved } from "@testing-library/react";
+import {
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import App from "../src/App";
 import {
   FAILED_TODOS_MESSAGE,
@@ -76,5 +80,25 @@ describe("Todo List Feature", () => {
     expect(
       screen.queryByText(todoToRemove.description)
     ).not.toBeInTheDocument();
+  });
+
+  test("When I toggle a todo isDone or not, it is persisted", async () => {
+    const { refreshPage } = render(<App />);
+
+    const todo = db.getTodos()[0];
+
+    userEvent.click(await screen.findByLabelText(todo.description));
+
+    refreshPage();
+    await waitFor(() => {
+      expect(screen.getByLabelText(todo.description)).toBeChecked();
+    });
+
+    userEvent.click(await screen.findByLabelText(todo.description));
+
+    refreshPage();
+    await waitFor(() => {
+      expect(screen.getByLabelText(todo.description)).not.toBeChecked();
+    });
   });
 });

@@ -34,7 +34,17 @@ function App() {
         {todos?.length === 0 && !query.isLoading && NO_TODOS_MESSAGE}
         {todos?.map((x) => (
           <div key={x.id} style={{ display: "flex" }}>
-            <p>{x.description}</p>
+            <label style={{ display: "flex", alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={x.isDone}
+                onChange={() =>
+                  commands.updateTodo(x.id, { isDone: !x.isDone })
+                }
+              />
+              <p>{x.description}</p>
+            </label>
+
             <label
               htmlFor={`remove-${x.id}`}
               style={{ display: "none" }}

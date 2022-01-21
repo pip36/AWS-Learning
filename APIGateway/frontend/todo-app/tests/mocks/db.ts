@@ -1,4 +1,4 @@
-import { generateTodo, Todo } from "../../src/domain/Todo";
+import { generateTodo, Todo, UpdateTodoBody } from "../../src/domain/Todo";
 
 type DbData = {
   todos: { [key: string]: Todo };
@@ -32,12 +32,15 @@ class Db {
     this.data.todos[todo.id] = todo;
   }
 
+  updateTodo(id: string, payload: UpdateTodoBody): void {
+    this.data.todos[id] = { ...this.data.todos[id], ...payload };
+  }
+
   deleteTodo(id: string): void {
     delete this.data.todos[id];
   }
 }
 
 const db = new Db();
-db.seed();
 
 export default db;

@@ -13,7 +13,7 @@ export const useQuery = <T>(url: string): QueryResult<T> => {
   const [data, setData] = useState<T | null>(null);
   const [invalidation, setInvalidation] = useState(0);
 
-  const invalidate = () => setInvalidation(invalidation + 1);
+  let invalidate = () => setInvalidation(invalidation + 1);
 
   useEffect(() => {
     let isCancelled = false;
@@ -34,6 +34,7 @@ export const useQuery = <T>(url: string): QueryResult<T> => {
 
     return () => {
       isCancelled = true;
+      invalidate = () => {};
     };
   }, [invalidation]);
 
